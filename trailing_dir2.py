@@ -7,10 +7,10 @@ def print_help():
 	print(
 		("1. create trailing_dir files in all the appropriate\n"
 		 "   places in the SRC dir tree. These files are called\n"
-		 "   {TD_BLOCKFILES, TD_BLOCKDIRS, TD_IGNORE}. contents irrelevant\n"
-		 "     TD_BLOCKFILES: prevents files in this shallow dir from being visited"
-		 "     TD_BLOCKDIRS: prevents subdirectories from being visited"
-		 "     TD_IGNORE: a text file with a line for each filename.\n"
+		 "   {NOFILES.td, NODIRS.td, IGNORE.td}. contents irrelevant\n"
+		 "     NOFILES.td: prevents files in this shallow dir from being visited"
+		 "     NODIRS.td: prevents subdirectories from being visited"
+		 "     IGNORE.td: a text file with a line for each filename.\n"
 		 "         TD will skip these files in the SHALLOW DIR"
 		 "2. run script with args <src> and <dest>"
 		)
@@ -48,21 +48,23 @@ def traverse(d, depth=0):
 	files_enabled = True
 	dirs_enabled = True
 	try:
-		with open(os.path.join(d, 'TD_IGNORE'), 'r') as ignore:
+		with open(os.path.join(d, 'IGNORE.td'), 'r') as ignore:
 			ignored = list([ln.strip() for ln in ignore.readlines()])
 	except: pass
 	
 	for x in os.listdir(d):
+		
+		new_path = os.path.join(d, x)
 		if x in ignored:
-			print('    ignoring {}'.format(x))
+			print('    {}ignoring {}'.format(' '*depth*2, new_path))
 			continue
-		if x == 'TD_BLOCKDIRS':
+		if x == 'IGNORE.td': continue
+		if x == 'NODIRS.td':
 			dirs_enabled = False
 			continue
-		if x == 'TD_BLOCKFILES':
+		if x == 'NOFILES.td':
 			files_enabled = False
 			continue
-		new_path = os.path.join(d, x)
 		if os.path.isdir(new_path):
 			dirs.append(new_path)
 		else:
@@ -86,7 +88,7 @@ def traverse(d, depth=0):
 				os.makedirs(d_path)
 				preamble = '(+)'
 			#print('<{}>'.format(d_path))
-			print('{} {}traversing {}'.format(preamble, ' '*depth*2, x))
+			print('{} {}traverse {}'.format(preamble, ' '*depth*2, x))
 			traverse(x, depth=depth+1)
 	
 traverse(src_path)
